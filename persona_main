@@ -1,0 +1,6818 @@
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Таблица с вложенными спойлерами</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald&display=swap&subset=cyrillic" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+body {
+        font-family: 'Oswald', sans-serif;
+        background-image: url("https://i.postimg.cc/tTYGKTLF/bg.webp"); /* путь к картинке */
+        background-size: cover;       /* растягивает на весь экран */
+        background-repeat: no-repeat; /* отключает повтор */
+        background-attachment: fixed;
+        background-position: center;  /* центрирует картинку */
+    }
+    .persona-header {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin: 40px 0 20px 0;
+        transform: rotate(-5.5deg);
+        user-select: none;
+        height: 80px;
+        align-items: center;
+    }
+    .persona-background,
+    .persona-shadow {
+        position: absolute;
+        width: 100%;
+        max-width: 250px;
+        height: 100%;
+        max-height: 60px;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%) skewX(-20deg);
+        border-radius: 0;
+    }
+    .persona-background {
+        background: black;
+        transform: translate(-50%, -50%) rotate(-1.5deg);
+        z-index: 0;
+    }
+    .persona-shadow {
+        background: red;
+        width: 100%;
+        max-width: 300px;
+        height: 100%;
+        max-height: 45px;
+        top: calc(50% + 15px);
+        left: calc(50% + 30px);
+        transform: translate(-50%, -50%) skewX(-10deg) rotate(2.5deg);
+        z-index: -1;
+    }
+    .persona-text {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        z-index: 2;
+        font-weight: normal; /* вернул обычную толщину */
+        font-size: 44px;
+        font-family: 'Oswald', sans-serif;
+        letter-spacing: 1.5px;
+    }
+    .persona-text span {
+        display: inline-block;
+        color: white;
+        font-weight: normal;
+        transform-origin: center;
+        transform: rotate(calc(-3deg + (6deg * var(--r))));
+        --r: 0;
+        user-select: none;
+    }
+    .persona-text span:nth-child(1) { --r: 0.1; font-size: 46px; }
+    .persona-text span:nth-child(2) { --r: -0.2; font-size: 42px; }
+    .persona-text span:nth-child(3) { --r: 0.7; font-size: 44px; }
+    .persona-text span:nth-child(4) { --r: 0.15; font-size: 48px; color:#000000; }
+    .persona-text span:nth-child(5) { --r: -0.1; font-size: 45px; }
+    .persona-text span:nth-child(6) { --r: 0.95; font-size: 43px; }
+    /* Для буквы Е */
+    .e-letter {
+      position: relative;
+      background: white;
+      padding: 0px 10px; /* толщина белого фона */
+      display: inline-block;
+      user-select: none;
+    /* Чтобы контейнер был родителем для абсолютного позиционирования */
+    }
+    .table-wrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      margin: 0;
+      border-spacing: 0;
+      box-shadow: -8px 8px 0 red, -12px 12px 0 black;
+      transform: rotate(-1.5deg);
+      background-color: #ffffff;
+    }
+    .custom-hex-wrapper {
+  position: absolute;
+  top: -30px;
+  right: -70px;
+  width: 100%;
+  max-width: 60px;
+  height: 100%;
+  max-height: 60px;
+  z-index: 10;
+}
+
+/* Внешняя черная обводка */
+.custom-hex-outline {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 135%;
+  max-width: 80px;
+  height: 135%;
+  max-height: 80px;
+  background: black;
+  clip-path: polygon(
+    30% 0%, 70% 5%, 100% 50%,
+    70% 95%, 30% 100%, 0% 50%
+  );
+  z-index: 0;
+}
+
+/* Основная кнопка */
+.custom-hex-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 60px;
+  height: 100%;
+  max-height: 60px;
+  background: white;
+  font-family: 'Oswald', sans-serif;
+  font-size: 36px;
+  font-weight: bold;
+  color: black;
+  text-align: center;
+  line-height: 60px;
+  cursor: pointer;
+  clip-path: polygon(
+    30% 0%, 70% 5%, 100% 50%,
+    70% 95%, 30% 100%, 0% 50%
+  );
+  z-index: 1;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 80px; /* чуть ниже кнопки */
+  right: -140px;
+  background: white;
+  font-family: 'Oswald', sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  color: black;
+  padding: 8px 16px;
+  white-space: nowrap; /* не переносить текст */
+  display: inline-block; /* чтобы размер по содержимому */
+  cursor: default;
+  clip-path: polygon(
+    0% 0%, 95% 5%, 100% 100%, 5% 100%
+  ); /* пример кривого четырёхугольника */
+
+  z-index: 20;
+}
+
+.custom-tooltip-shadow {
+  position: absolute;
+  top: 140%; /* сразу под плашкой */
+  left: -230%;
+  width: 550%;
+  height: 40px;
+  background-color: red;
+  clip-path: polygon(1% 0%, 97% 5%, 100% 100%, 5% 100%);
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+    th, td {
+      border: 1px solid #000000;
+      padding: 8px;
+      text-align: left;
+    }
+    .hidden {
+      display: none;
+    }
+    .toggle {
+      cursor: pointer;
+      background-color: #ffffff;
+    }
+    .toggle:hover {
+      background-color: #ff0000;
+    }
+    .active {
+  background-color: #ff0000
+    }
+    .indent-1 {
+      padding-left: 20px;
+    }
+    .indent-2 {
+      padding-left: 40px;
+    }
+/* Для экранов до 768px */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .header, .footer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  /* Пример: у тебя есть блоки, которые на десктопе стоят в ряд — на мобилках пусть станут вертикально */
+  .some-flex-container {
+    flex-direction: column;
+  }
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.item {
+  flex: 1 1 300px; /* адаптивно меняет ширину */
+  margin: 10px;
+}
+@media (max-width: 768px) {
+  #image-display img {
+    max-width: 50%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+}
+  </style>
+</head>
+<div id="image-display" style="
+  position: fixed;
+  bottom: -15px;
+  left: -10px;
+  width: 300px;
+  height: auto;
+  background: rgba(0, 0, 0, 0);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 9999;
+">
+  <img id="displayed-image" src="" alt="" style="width: 100%; height: auto;" />
+</div>
+<body>
+<div class="persona-header">
+  <div class="persona-shadow"></div>
+  <div class="persona-background"></div>
+  <div class="persona-text">
+    <span><strong>О</strong></span>
+    <span><strong>Т</strong></span>
+    <span><strong>В</strong></span>
+    <span class="e-letter"><strong>Е</strong></span>
+    <span><strong>Т</strong></span>
+    <span><strong>Ы</strong></span>
+  </div>
+</div>
+<div class="table-wrapper">
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 5%;"></th>
+      <th style="width: 31%;">1</th>
+      <th style="width: 32%;">2</th>
+      <th style="width: 32%;">3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group1" data-image="https://i.postimg.cc/8P1cYdZv/ryuji.png">
+      <td><strong>1</strong></td>
+      <td colspan="3"><strong>Рюдзи (Колесница)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group1 hidden indent-1" data-target="group1-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group1-1 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group1-1 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group1-1 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group1-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group1 hidden indent-2" data-target="group1-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group1-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-2 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group1 hidden indent-3" data-target="group1-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group1-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-3 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    
+        <!-- Подгруппа 4 -->
+    <tr class="toggle group1 hidden indent-4" data-target="group1-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group1-4 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group1-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-4 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group1-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>-</td>
+      <td>+0</td>
+    </tr>
+
+        <!-- Подгруппа 5 -->
+    <tr class="toggle group1 hidden indent-5" data-target="group1-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>-</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group1 hidden indent-6" data-target="group1-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group1-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group1-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group1-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group1 hidden indent-7" data-target="group1-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group1-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group1-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group1-7 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group1-7 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group1-7 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group1 hidden indent-8" data-target="group1-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group1-8 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group1-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group1-8 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group1-8 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group1-8 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group1 hidden indent-9" data-target="group1-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10(МАКС)</strong></td>
+    </tr>
+    <tr class="group1-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group1-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group2" data-image="https://i.postimg.cc/B6Yw2fQp/Maruki.webp">
+      <td><strong>2</strong></td>
+      <td colspan="3"><strong>Маруки (Советник)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group2 hidden indent-1" data-target="group2-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group2-1 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-1 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-1 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-1 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-1 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group2 hidden indent-2" data-target="group2-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group2-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group2 hidden indent-3" data-target="group2-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group2 hidden indent-4" data-target="group2-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group2 hidden indent-5" data-target="group2-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group2 hidden indent-6" data-target="group2-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group2-6 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group2-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group2-6 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group2-6 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group2 hidden indent-7" data-target="group2-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group2-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group2 hidden indent-8" data-target="group2-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group2-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group2-8 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group2 hidden indent-9" data-target="group2-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10(МАКС)</strong></td>
+    </tr>
+    <tr class="group2-9 hidden">
+      <td></td>
+      <td>Развитие сюжета...</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group3" data-image="https://i.postimg.cc/2yzYHD4Z/Takemi.webp">
+      <td><strong>3</strong></td>
+      <td colspan="3"><strong>Такеми (Смерть)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group3 hidden indent-1" data-target="group3-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group3-1 hidden">
+      <td>П</td>
+      <td>+1</td>
+      <td>+3</td>
+      <td>+1</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group3 hidden indent-2" data-target="group3-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2 (Смелость ур.2)</strong></td>
+    </tr>
+    <tr class="group3-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group3-2 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group3-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group3 hidden indent-3" data-target="group3-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group3-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-3 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group3-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group3 hidden indent-4" data-target="group3-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group3-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group3-4 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group3-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group3 hidden indent-5" data-target="group3-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group3-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-5 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group3-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group3 hidden indent-6" data-target="group3-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group3-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group3-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group3-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group3 hidden indent-7" data-target="group3-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group3-7 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group3-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+        <tr class="group3-7 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+        <tr class="group3-7 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group3 hidden indent-8" data-target="group3-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7.5 (Харизма ур.4)</strong></td>
+    </tr>
+    <tr class="group3-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group3-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-8 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-8 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group3 hidden indent-9" data-target="group3-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group3-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-9 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group3-9 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group3-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group3 hidden indent-10" data-target="group3-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>О3</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td>+0(ДРУЖБА,КОНЕЦ)</td>
+      <td></td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>О4</td>
+      <td>+2(ЛЮБОВЬ)</td>
+      <td>+0(ДРУЖБА,КОНЕЦ)</td>
+      <td></td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>О5</td>
+      <td>+3(ЛЮБОВЬ)</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group3-10 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group3 hidden indent-11" data-target="group3-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group3-11 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-11 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 12 -->
+    <tr class="toggle group3 hidden indent-12" data-target="group3-12">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group3-12 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group3-12 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group3-12 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group4" data-image="https://i.postimg.cc/vH2yvCD4/Ohya.webp">
+      <td><strong>4</strong></td>
+      <td colspan="3"><strong>Оя (Дьявол)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group4 hidden indent-1" data-target="group4-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group4-1 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group4 hidden indent-2" data-target="group4-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group4-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group4-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group4 hidden indent-3" data-target="group4-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group4-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group4-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-3 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group4 hidden indent-4" data-target="group4-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group4-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group4-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group4 hidden indent-5" data-target="group4-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group4-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-5 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group4 hidden indent-6" data-target="group4-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group4-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-6 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-6 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group4 hidden indent-7" data-target="group4-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group4-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-7 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group4-7 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group4-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group4 hidden indent-8" data-target="group4-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7.5</strong></td>
+    </tr>
+    <tr class="group4-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group4 hidden indent-9" data-target="group4-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group4-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-9 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group4-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group4 hidden indent-10" data-target="group4-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О5</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td>+0(ДРУЖБА.КОНЕЦ)</td>
+      <td></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>О6</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-10 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group4 hidden indent-11" data-target="group4-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group4-11 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-11 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-11 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group4-11 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group4-11 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 12 -->
+    <tr class="toggle group4 hidden indent-12" data-target="group4-12">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group4-12 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-12 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group4-12 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group4-12 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group5" data-image="https://i.postimg.cc/JzyLYKBP/Yusuke.webp">
+      <td><strong>5</strong></td>
+      <td colspan="3"><strong>Юскэ (Император)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group5 hidden indent-1" data-target="group5-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group5-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group5 hidden indent-2" data-target="group5-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group5-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-2 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group5 hidden indent-3" data-target="group5-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group5-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group5-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-3 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-3 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group5-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group5 hidden indent-4" data-target="group5-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group5-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group5-4 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group5 hidden indent-5" data-target="group5-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group5-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group5-5 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group5-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group5 hidden indent-6" data-target="group5-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group5-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-6 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group5-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group5 hidden indent-7" data-target="group5-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group5-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group5-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group5 hidden indent-8" data-target="group5-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group5-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group5-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group5 hidden indent-9" data-target="group5-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group5-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group5-9 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group5 hidden indent-10" data-target="group5-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10(МАКС)</strong></td>
+    </tr>
+    <tr class="group5-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group5-10 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group5-10 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group6" data-image="https://i.postimg.cc/Hxm1xgvh/Haru.webp">
+      <td><strong>6</strong></td>
+      <td colspan="3"><strong>Хару (Императрица)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group6 hidden indent-1" data-target="group6-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group6-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group6 hidden indent-2" data-target="group6-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group6-2 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-2 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-2 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group6 hidden indent-3" data-target="group6-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group6-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-3 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-3 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-3 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group6 hidden indent-4" data-target="group6-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-4 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group6 hidden indent-5" data-target="group6-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group6-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-5 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group6 hidden indent-6" data-target="group6-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group6-6 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group6 hidden indent-7" data-target="group6-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group6-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-7 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-7 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group6-7 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group6 hidden indent-8" data-target="group6-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group6-8 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-8 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-8 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-8 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group6 hidden indent-9" data-target="group6-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group6-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-9 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-9 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-9 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group6-9 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group6 hidden indent-10" data-target="group6-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10(ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group6-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-10 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group6-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group6 hidden indent-11" data-target="group6-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10(ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group6-11 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-11 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group6-11 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group6-11 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group7" data-image="https://i.postimg.cc/tJC03zjd/Kasumi.webp">
+      <td><strong>7</strong></td>
+      <td colspan="3"><strong>Касуми (Вера)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group7 hidden indent-1" data-target="group7-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group7 hidden indent-2" data-target="group7-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О8</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-2 hidden">
+      <td>О9</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group7 hidden indent-3" data-target="group7-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О6</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О8</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>О9</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group7 hidden indent-4" data-target="group7-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-4 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group7 hidden indent-5" data-target="group7-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6 (УСЛОВИЯ ИСТИННОЙ КОНЦОВКИ)</strong></td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О8</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>О9</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group7 hidden indent-6" data-target="group7-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group7 hidden indent-7" data-target="group7-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О8</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>О9</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group7-7 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group7 hidden indent-8" data-target="group7-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О8</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>О9</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-8 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group7 hidden indent-9" data-target="group7-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-9 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group7 hidden indent-10" data-target="group7-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group7-10 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group8" data-image="https://i.postimg.cc/26k9M8Kr/Chihaya.webp">
+      <td><strong>8</strong></td>
+      <td colspan="3"><strong>Тихая (Судьба)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group8 hidden indent-1" data-target="group8-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group8-1 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+1</td>
+      <td>+1</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group8 hidden indent-2" data-target="group8-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group8-2 hidden">
+      <td>О1</td>
+      <td>-</td>
+      <td>-</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-2 hidden">
+      <td>О2</td>
+      <td>-</td>
+      <td>+0</td>
+      <td>-</td>
+    </tr>
+    <tr class="group8-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group8-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group8 hidden indent-3" data-target="group8-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group8-3 hidden">
+      <td>О1</td>
+      <td>-</td>
+      <td>+0</td>
+      <td>-</td>
+    </tr>
+    <tr class="group8-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr class="group8-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group8 hidden indent-4" data-target="group8-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-4 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group8 hidden indent-5" data-target="group8-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group8-5 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group8-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group8 hidden indent-6" data-target="group8-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group8-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-6 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group8-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group8 hidden indent-7" data-target="group8-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group8-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group8-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group8 hidden indent-8" data-target="group8-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7.5</strong></td>
+    </tr>
+    <tr class="group8-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group8 hidden indent-9" data-target="group8-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group8-9 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group8-9 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group8-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group8-9 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group8 hidden indent-10" data-target="group8-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group8-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group8-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group8-10 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group8 hidden indent-11" data-target="group8-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-11 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 12 -->
+    <tr class="toggle group8 hidden indent-12" data-target="group8-12">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О6</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group8-12 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group9" data-image="https://i.postimg.cc/wTm2WmjD/Futaba.webp">
+      <td><strong>9</strong></td>
+      <td colspan="3"><strong>Футаба (Отшельник)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group9 hidden indent-1" data-target="group9-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2 (Доброта ур. 4)</strong></td>
+    </tr>
+    <tr class="group9-1 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group9-1 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-1 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>Повтор</td>
+      <td></td>
+    </tr>
+    <tr class="group9-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group9 hidden indent-2" data-target="group9-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group9-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group9-2 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-2 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group9 hidden indent-3" data-target="group9-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group9-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-3 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group9-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group9 hidden indent-4" data-target="group9-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group9-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-4 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group9-4 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group9-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group9 hidden indent-5" data-target="group9-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group9-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-5 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group9 hidden indent-6" data-target="group9-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group9-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group9 hidden indent-7" data-target="group9-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group9-7 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group9-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group9 hidden indent-8" data-target="group9-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>О4</td>
+      <td>+0(ДРУЖБА.КОНЕЦ)</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>О5-О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-8 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group9 hidden indent-9" data-target="group9-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group9-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group9-9 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group9-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-9 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group9 hidden indent-10" data-target="group9-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О8</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group9-10 hidden">
+      <td>О9</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group10" data-image="https://i.postimg.cc/6Q9h5bLh/Sojiro.webp">
+      <td><strong>10</strong></td>
+      <td colspan="3"><strong>Содзиро (Иерофант)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group10 hidden indent-1" data-target="group10-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group10-1 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group10 hidden indent-2" data-target="group10-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group10-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-2 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group10-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group10 hidden indent-3" data-target="group10-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group10-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group10 hidden indent-4" data-target="group10-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group10-4 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group10 hidden indent-5" data-target="group10-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5 (После 8/22)</strong></td>
+    </tr>
+    <tr class="group10-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group10-5 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-5 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group10 hidden indent-6" data-target="group10-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group10-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group10-6 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group10-6 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group10-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group10 hidden indent-7" data-target="group10-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7 (Макс. Доброта)</strong></td>
+    </tr>
+    <tr class="group10-7 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-7 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group10 hidden indent-8" data-target="group10-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group10-8 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group10 hidden indent-9" data-target="group10-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group10-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group10-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group10-9 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group10 hidden indent-10" data-target="group10-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (МАКС)</strong></td>
+    </tr>
+    <tr class="group10-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group10-10 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group11" data-image="https://i.postimg.cc/ThMV8t3g/Iwai.webp">
+      <td><strong>11</strong></td>
+      <td colspan="3"><strong>Иваи (Повешенный)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group11 hidden indent-1" data-target="group11-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1 (Смелость ур. 4)</strong></td>
+    </tr>
+    <tr class="group11-1 hidden">
+      <td>П</td>
+      <td>+1</td>
+      <td>+1</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group11 hidden indent-2" data-target="group11-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group11-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group11 hidden indent-3" data-target="group11-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group11-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-3 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group11-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-3 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group11 hidden indent-4" data-target="group11-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group11-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group11 hidden indent-5" data-target="group11-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group11-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-5 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group11 hidden indent-6" data-target="group11-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group11-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-6 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-6 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group11 hidden indent-7" data-target="group11-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group11-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group11-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group11-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group11 hidden indent-8" data-target="group11-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7.5 (Макс. Смелость)</strong></td>
+    </tr>
+    <tr class="group11-8 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group11 hidden indent-9" data-target="group11-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group11-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-9 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group11 hidden indent-10" data-target="group11-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group11-10 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group11 hidden indent-11" data-target="group11-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (МАКС)</strong></td>
+    </tr>
+    <tr class="group11-11 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group11-11 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group11-11 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group12" data-image="https://i.postimg.cc/QNBv3VMd/Goro.webp">
+      <td><strong>12</strong></td>
+      <td colspan="3"><strong>Горо (Справедливость)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group12 hidden indent-1" data-target="group12-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group12-1 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group12 hidden indent-2" data-target="group12-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3 (Харизма ур.3)</strong></td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-2 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>-</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group12 hidden indent-3" data-target="group12-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group12-3 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group12 hidden indent-4" data-target="group12-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group12-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-4 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group12 hidden indent-5" data-target="group12-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group12-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group12 hidden indent-6" data-target="group12-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7 (Эрудиция ур.4)</strong></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group12 hidden indent-7" data-target="group12-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group12-7 hidden">
+      <td>О8</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group12 hidden indent-8" data-target="group12-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9 (МАКС)</strong></td>
+    </tr>
+    <tr class="group12-8 hidden">
+      <td></td>
+      <td>Развитие сюжета...</td>
+    </tr>
+
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group13" data-image="https://i.postimg.cc/DyLDSDLV/Ann.png">
+      <td><strong>13</strong></td>
+      <td colspan="3"><strong>Анн (Возлюбленные)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group13 hidden indent-1" data-target="group13-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2 (Доброта ур.2)</strong></td>
+    </tr>
+    <tr class="group13-1 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group13-1 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group13-1 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-1 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group13 hidden indent-2" data-target="group13-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О8</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>О9</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group13-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group13 hidden indent-3" data-target="group13-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group13 hidden indent-4" data-target="group13-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group13-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group13-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group13-4 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-4 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group13 hidden indent-5" data-target="group13-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group13-5 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group13-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-5 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group13 hidden indent-6" data-target="group13-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group13-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-6 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group13 hidden indent-7" data-target="group13-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group13-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group13-7 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-7 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group13 hidden indent-8" data-target="group13-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>О4</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td>+0(ДРУЖБА.КОНЕЦ)</td>
+      <td></td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-8 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group13 hidden indent-9" data-target="group13-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group13-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-9 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-9 hidden">
+      <td>О3</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-9 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-9 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group13 hidden indent-10" data-target="group13-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group13-10 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group14" data-image="https://i.postimg.cc/jjdkkS9K/Mishima.webp">
+      <td><strong>14</strong></td>
+      <td colspan="3"><strong>Мисима (Луна)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group14 hidden indent-1" data-target="group14-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group14-1 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-1 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-1 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group14 hidden indent-2" data-target="group14-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group14-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-2 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group14 hidden indent-3" data-target="group14-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group14-3 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-3 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group14 hidden indent-4" data-target="group14-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group14-4 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group14-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group14 hidden indent-5" data-target="group14-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group14-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-5 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group14 hidden indent-6" data-target="group14-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6.5</strong></td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-6 hidden">
+      <td>О7</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group14 hidden indent-7" data-target="group14-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group14-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-7 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group14-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group14 hidden indent-8" data-target="group14-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group14-8 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-8 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group14-8 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group14 hidden indent-9" data-target="group14-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group14-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group14-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-9 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group14 hidden indent-10" data-target="group14-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (МАКС)</strong></td>
+    </tr>
+    <tr class="group14-10 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group14-10 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group14-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group14-10 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group15" data-image="https://i.postimg.cc/xCXpnFn4/Hifumi.webp">
+      <td><strong>15</strong></td>
+      <td colspan="3"><strong>Хифуми (Звезда)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group15 hidden indent-1" data-target="group15-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1 (Харизма ур.3)</strong></td>
+    </tr>
+    <tr class="group15-1 hidden">
+      <td>П</td>
+      <td>+1</td>
+      <td>+1</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group15 hidden indent-2" data-target="group15-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group15-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group15 hidden indent-3" data-target="group15-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group15-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group15 hidden indent-4" data-target="group15-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group15-4 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group15-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group15 hidden indent-5" data-target="group15-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group15-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group15 hidden indent-6" data-target="group15-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group15-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-6 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group15-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group15 hidden indent-7" data-target="group15-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group15-7 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group15-7 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group15 hidden indent-8" data-target="group15-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7.5 (Макс. Эрудиция)</strong></td>
+    </tr>
+    <tr class="group15-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-8 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group15 hidden indent-9" data-target="group15-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group15-9 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group15-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group15 hidden indent-10" data-target="group15-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group15-10 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group15-10 hidden">
+      <td>О3</td>
+      <td>+0(ДРУЖБА.КОНЕЦ)</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group15-10 hidden">
+      <td>О4</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-10 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group15 hidden indent-11" data-target="group15-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group15-11 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group15-11 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-11 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-11 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 12 -->
+    <tr class="toggle group15 hidden indent-12" data-target="group15-12">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group15-12 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group15-12 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-12 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group15-12 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group15-12 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group16" data-image="https://i.postimg.cc/7h7BTGC1/Makoto.png">
+      <td><strong>16</strong></td>
+      <td colspan="3"><strong>Макото (Верховная жрица)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group16 hidden indent-1" data-target="group16-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1 (Эрудиция ур.3)</strong></td>
+    </tr>
+    <tr class="group16-1 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+1</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group16 hidden indent-2" data-target="group16-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group16-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-2 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group16-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group16 hidden indent-3" data-target="group16-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group16-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-3 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group16 hidden indent-4" data-target="group16-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group16-4 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group16-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-4 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-4 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group16 hidden indent-5" data-target="group16-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group16-5 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-5 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group16-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group16 hidden indent-6" data-target="group16-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6 (Макс. Доброта)</strong></td>
+    </tr>
+    <tr class="group16-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group16 hidden indent-7" data-target="group16-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О6</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>О7</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group16-7 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group16 hidden indent-8" data-target="group16-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group16-8 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-8 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group16 hidden indent-9" data-target="group16-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О5</td>
+      <td>+3(ДРУЖБА.КОНЕЦ)</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>О6</td>
+      <td>+3(ЛЮБОВЬ)</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group16-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group16 hidden indent-10" data-target="group16-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)</strong></td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О5</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group16-10 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 11 -->
+    <tr class="toggle group16 hidden indent-11" data-target="group16-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)</strong></td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group16-11 hidden">
+      <td>О6</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group17" data-image="https://i.postimg.cc/SxmZJKm8/Toranosuke.webp">
+      <td><strong>17</strong></td>
+      <td colspan="3"><strong>Тораноскэ (Солнце)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group17 hidden indent-1" data-target="group17-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1 Работа в ресторане</strong></td>
+    </tr>
+    <tr class="group17-1 hidden">
+      <td>П</td>
+      <td>+1</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group17 hidden indent-2" data-target="group17-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group17-2 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-2 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group17-2 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group17 hidden indent-3" data-target="group17-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group17-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group17-3 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-3 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group17 hidden indent-4" data-target="group17-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group17-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group17-4 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-4 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group17-4 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group17 hidden indent-5" data-target="group17-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group17-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group17 hidden indent-6" data-target="group17-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group17-6 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group17-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group17-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group17 hidden indent-7" data-target="group17-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group17-7 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group17 hidden indent-8" data-target="group17-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group17-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group17-8 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group17-8 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group17 hidden indent-9" data-target="group17-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group17-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group17-9 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group17 hidden indent-10" data-target="group17-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (МАКС)</strong></td>
+    </tr>
+    <tr class="group17-10 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group18" data-image="https://i.postimg.cc/LsbvCBLB/Kawakami.webp">
+      <td><strong>18</strong></td>
+      <td colspan="3"><strong>Каваками (Умеренность)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group18 hidden indent-1" data-target="group18-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1 (Смелость ур.3)</strong></td>
+    </tr>
+    <tr class="group18-1 hidden">
+      <td>П</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group18 hidden indent-2" data-target="group18-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group18-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-2 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-2 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group18 hidden indent-3" data-target="group18-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group18-3 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-3 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group18 hidden indent-4" data-target="group18-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group18-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-4 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-4 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-4 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group18 hidden indent-5" data-target="group18-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-5 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group18 hidden indent-6" data-target="group18-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group18-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-6 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-6 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-6 hidden">
+      <td>П</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group18 hidden indent-7" data-target="group18-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group18-7 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group18 hidden indent-8" data-target="group18-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group18-8 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group18 hidden indent-9" data-target="group18-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8.5</strong></td>
+    </tr>
+    <tr class="group18-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-9 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-9 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+<!-- Подгруппа 10 -->
+    <tr class="toggle group18 hidden indent-10" data-target="group18-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9<strong></td>
+    </tr>
+    <tr class="group18-10 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-10 hidden">
+      <td>О2</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group18-10 hidden">
+      <td>О3</td>
+      <td>+2(ДРУЖБА.КОНЕЦ)</td>
+      <td>+2(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group18-10 hidden">
+      <td>О4</td>
+      <td>+2(ДРУЖБА.КОНЕЦ)</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+    <tr class="group18-10 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0(ЛЮБОВЬ)</td>
+      <td></td>
+    </tr>
+
+<!-- Подгруппа 11 -->
+    <tr class="toggle group18 hidden indent-11" data-target="group18-11">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ДРУЖБА)<strong></td>
+    </tr>
+    <tr class="group18-11 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group18-11 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-11 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-11 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-11 hidden">
+      <td>О5</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+<!-- Подгруппа 12 -->
+    <tr class="toggle group18 hidden indent-12" data-target="group18-12">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (ЛЮБОВЬ)<strong></td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О5</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О6</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group18-12 hidden">
+      <td>О7</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+
+    <!-- Верхний уровень -->
+    <tr class="toggle" data-target="group19" data-image="https://i.postimg.cc/HW53zMxX/Oda.webp">
+      <td><strong>19</strong></td>
+      <td colspan="3"><strong>Ода (Башня)</strong></td>
+    </tr>
+
+    <!-- Подгруппа 1 -->
+    <tr class="toggle group19 hidden indent-1" data-target="group19-1">
+      <td></td>
+      <td colspan="3"><strong>Ранг 1</strong></td>
+    </tr>
+    <tr class="group19-1 hidden">
+      <td>П</td>
+      <td>+1</td>
+      <td>+1</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 2 -->
+    <tr class="toggle group19 hidden indent-2" data-target="group19-2">
+      <td></td>
+      <td colspan="3"><strong>Ранг 2</strong></td>
+    </tr>
+    <tr class="group19-2 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-2 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-2 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td></td>
+    </tr>
+    <tr class="group19-2 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group19-2 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 3 -->
+    <tr class="toggle group19 hidden indent-3" data-target="group19-3">
+      <td></td>
+      <td colspan="3"><strong>Ранг 3</strong></td>
+    </tr>
+    <tr class="group19-3 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-3 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-3 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-3 hidden">
+      <td>О4</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-3 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 4 -->
+    <tr class="toggle group19 hidden indent-4" data-target="group19-4">
+      <td></td>
+      <td colspan="3"><strong>Ранг 4</strong></td>
+    </tr>
+    <tr class="group19-4 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group19-4 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 5 -->
+    <tr class="toggle group19 hidden indent-5" data-target="group19-5">
+      <td></td>
+      <td colspan="3"><strong>Ранг 5</strong></td>
+    </tr>
+    <tr class="group19-5 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group19-5 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-5 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group19-5 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 6 -->
+    <tr class="toggle group19 hidden indent-6" data-target="group19-6">
+      <td></td>
+      <td colspan="3"><strong>Ранг 6</strong></td>
+    </tr>
+    <tr class="group19-6 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-6 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group19-6 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group19-6 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-6 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+
+    <!-- Подгруппа 7 -->
+    <tr class="toggle group19 hidden indent-7" data-target="group19-7">
+      <td></td>
+      <td colspan="3"><strong>Ранг 7</strong></td>
+    </tr>
+    <tr class="group19-7 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-7 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group19-7 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-7 hidden">
+      <td>О4</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 8 -->
+    <tr class="toggle group19 hidden indent-8" data-target="group19-8">
+      <td></td>
+      <td colspan="3"><strong>Ранг 8</strong></td>
+    </tr>
+    <tr class="group19-8 hidden">
+      <td>О1</td>
+      <td>+0</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group19-8 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group19-8 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+    <tr class="group19-8 hidden">
+      <td>О4</td>
+      <td>+3</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+
+    <!-- Подгруппа 9 -->
+    <tr class="toggle group19 hidden indent-9" data-target="group19-9">
+      <td></td>
+      <td colspan="3"><strong>Ранг 9</strong></td>
+    </tr>
+    <tr class="group19-9 hidden">
+      <td>О1</td>
+      <td>+3</td>
+      <td>+0</td>
+      <td>+2</td>
+    </tr>
+    <tr class="group19-9 hidden">
+      <td>О2</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group19-9 hidden">
+      <td>О3</td>
+      <td>+2</td>
+      <td>+0</td>
+      <td>+0</td>
+    </tr>
+    <tr class="group19-9 hidden">
+      <td>П</td>
+      <td>+2</td>
+      <td>+2</td>
+      <td>+2</td>
+    </tr>
+
+    <!-- Подгруппа 10 -->
+    <tr class="toggle group19 hidden indent-10" data-target="group19-10">
+      <td></td>
+      <td colspan="3"><strong>Ранг 10 (МАКС)</strong></td>
+    </tr>
+    <tr class="group19-10 hidden">
+      <td>О1</td>
+      <td>+2</td>
+      <td>+3</td>
+      <td></td>
+    </tr>
+    <tr class="group19-10 hidden">
+      <td>О2</td>
+      <td>+0</td>
+      <td>+3</td>
+      <td>+3</td>
+    </tr>
+    <tr class="group19-10 hidden">
+      <td>О3</td>
+      <td>+0</td>
+      <td>+0</td>
+      <td></td>
+    </tr>
+
+    <div class="custom-hex-wrapper">
+  <div class="custom-hex-outline"></div>
+  <div class="custom-hex-button"><strong>!</strong></div>
+   <div class="custom-tooltip hidden">
+    Значения указаны при наличии персоны нужного аркана
+  </div>
+  <div class="custom-tooltip-shadow hidden"></div>
+</div>
+
+  </tbody>
+</table>
+        
+<script>
+  // Обработка кликов по тогглам
+  document.querySelectorAll('.toggle').forEach(toggle => {
+    toggle.addEventListener('click', function () {
+      const target = this.getAttribute('data-target');
+      const isTopLevel = !this.className.includes('indent-');
+      const imageElement = document.getElementById('displayed-image');
+
+      if (isTopLevel) {
+        const isActive = this.classList.contains('active');
+
+        document.querySelectorAll('.toggle').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('tr').forEach(row => {
+          if (row.className.match(/group[0-9]+(-[0-9]+)?/)) {
+            row.classList.add('hidden');
+          }
+        });
+
+        if (!isActive) {
+          this.classList.add('active');
+          document.querySelectorAll('.' + target).forEach(row => row.classList.remove('hidden'));
+
+          const imageSrc = this.getAttribute('data-image');
+          imageElement.src = imageSrc || '';
+        } else {
+          imageElement.src = '';
+        }
+      } else {
+        document.querySelectorAll('.' + target).forEach(row => {
+          row.classList.toggle('hidden');
+        });
+      }
+
+      const anyTopActive = [...document.querySelectorAll('.toggle')]
+        .some(t => !t.className.includes('indent-') && t.classList.contains('active'));
+
+      if (!anyTopActive) {
+        imageElement.src = '';
+      }
+    });
+  });
+
+  // Обработка клика по кнопке и показ плашки с тенью
+  const button = document.querySelector('.custom-hex-button');
+  const tooltip = document.querySelector('.custom-tooltip');
+  const tooltipShadow = document.querySelector('.custom-tooltip-shadow');
+
+  if (button && tooltip && tooltipShadow) {
+    button.addEventListener('click', function (event) {
+      tooltip.classList.toggle('hidden');
+      tooltipShadow.classList.toggle('hidden');
+      event.stopPropagation();
+    });
+
+    document.addEventListener('click', function () {
+      tooltip.classList.add('hidden');
+      tooltipShadow.classList.add('hidden');
+    });
+
+    tooltip.addEventListener('click', function (event) {
+      event.stopPropagation();
+    });
+
+    tooltipShadow.addEventListener('click', function (event) {
+      event.stopPropagation();
+    });
+  }
+</script>
