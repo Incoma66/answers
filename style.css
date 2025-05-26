@@ -1,0 +1,257 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+body {
+        font-family: 'Oswald', sans-serif;
+        background-image: url("https://i.postimg.cc/tTYGKTLF/bg.webp"); /* путь к картинке */
+        background-size: cover;       /* растягивает на весь экран */
+        background-repeat: no-repeat; /* отключает повтор */
+        background-attachment: fixed;
+        background-position: center;  /* центрирует картинку */
+    }
+    .persona-header {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin: 40px 0 20px 0;
+        transform: rotate(-5.5deg);
+        user-select: none;
+        height: 80px;
+        align-items: center;
+    }
+    .persona-background,
+    .persona-shadow {
+        position: absolute;
+        width: 100%;
+        max-width: 250px;
+        height: 100%;
+        max-height: 60px;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%) skewX(-20deg);
+        border-radius: 0;
+    }
+    .persona-background {
+        background: black;
+        transform: translate(-50%, -50%) rotate(-1.5deg);
+        z-index: 0;
+    }
+    .persona-shadow {
+        background: red;
+        width: 100%;
+        max-width: 300px;
+        height: 100%;
+        max-height: 45px;
+        top: calc(50% + 15px);
+        left: calc(50% + 30px);
+        transform: translate(-50%, -50%) skewX(-10deg) rotate(2.5deg);
+        z-index: -1;
+    }
+    .persona-text {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        z-index: 2;
+        font-weight: normal; /* вернул обычную толщину */
+        font-size: 44px;
+        font-family: 'Oswald', sans-serif;
+        letter-spacing: 1.5px;
+    }
+    .persona-text span {
+        display: inline-block;
+        color: white;
+        font-weight: normal;
+        transform-origin: center;
+        transform: rotate(calc(-3deg + (6deg * var(--r))));
+        --r: 0;
+        user-select: none;
+    }
+    .persona-text span:nth-child(1) { --r: 0.1; font-size: 46px; }
+    .persona-text span:nth-child(2) { --r: -0.2; font-size: 42px; }
+    .persona-text span:nth-child(3) { --r: 0.7; font-size: 44px; }
+    .persona-text span:nth-child(4) { --r: 0.15; font-size: 48px; color:#000000; }
+    .persona-text span:nth-child(5) { --r: -0.1; font-size: 45px; }
+    .persona-text span:nth-child(6) { --r: 0.95; font-size: 43px; }
+    /* Для буквы Е */
+    .e-letter {
+      position: relative;
+      background: white;
+      padding: 0px 10px; /* толщина белого фона */
+      display: inline-block;
+      user-select: none;
+    /* Чтобы контейнер был родителем для абсолютного позиционирования */
+    }
+    .table-wrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      margin: 0;
+      border-spacing: 0;
+      box-shadow: -8px 8px 0 red, -12px 12px 0 black;
+      transform: rotate(-1.5deg);
+      background-color: #ffffff;
+    }
+    .custom-hex-wrapper {
+  position: absolute;
+  top: -30px;
+  right: -70px;
+  width: 100%;
+  max-width: 60px;
+  height: 100%;
+  max-height: 60px;
+  z-index: 10;
+}
+
+/* Внешняя черная обводка */
+.custom-hex-outline {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 135%;
+  max-width: 80px;
+  height: 135%;
+  max-height: 80px;
+  background: black;
+  clip-path: polygon(
+    30% 0%, 70% 5%, 100% 50%,
+    70% 95%, 30% 100%, 0% 50%
+  );
+  z-index: 0;
+}
+
+/* Основная кнопка */
+.custom-hex-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 60px;
+  height: 100%;
+  max-height: 60px;
+  background: white;
+  font-family: 'Oswald', sans-serif;
+  font-size: 36px;
+  font-weight: bold;
+  color: black;
+  text-align: center;
+  line-height: 60px;
+  cursor: pointer;
+  clip-path: polygon(
+    30% 0%, 70% 5%, 100% 50%,
+    70% 95%, 30% 100%, 0% 50%
+  );
+  z-index: 1;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 80px; /* чуть ниже кнопки */
+  right: -140px;
+  background: white;
+  font-family: 'Oswald', sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  color: black;
+  padding: 8px 16px;
+  white-space: nowrap; /* не переносить текст */
+  display: inline-block; /* чтобы размер по содержимому */
+  cursor: default;
+  clip-path: polygon(
+    0% 0%, 95% 5%, 100% 100%, 5% 100%
+  ); /* пример кривого четырёхугольника */
+
+  z-index: 20;
+}
+
+.custom-tooltip-shadow {
+  position: absolute;
+  top: 140%; /* сразу под плашкой */
+  left: -230%;
+  width: 550%;
+  height: 40px;
+  background-color: red;
+  clip-path: polygon(1% 0%, 97% 5%, 100% 100%, 5% 100%);
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+    th, td {
+      border: 1px solid #000000;
+      padding: 8px;
+      text-align: left;
+    }
+    .hidden {
+      display: none;
+    }
+    .toggle {
+      cursor: pointer;
+      background-color: #ffffff;
+    }
+    .toggle:hover {
+      background-color: #ff0000;
+    }
+    .active {
+  background-color: #ff0000
+    }
+    .indent-1 {
+      padding-left: 20px;
+    }
+    .indent-2 {
+      padding-left: 40px;
+    }
+/* Для экранов до 768px */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .header, .footer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  /* Пример: у тебя есть блоки, которые на десктопе стоят в ряд — на мобилках пусть станут вертикально */
+  .some-flex-container {
+    flex-direction: column;
+  }
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.item {
+  flex: 1 1 300px; /* адаптивно меняет ширину */
+  margin: 10px;
+}
+@media (max-width: 768px) {
+  #image-display img {
+    max-width: 50%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+}
